@@ -27,6 +27,21 @@ The following steps are required in order to run Adaptive Coder:
 **The simplest way to run Adaptive Coder is using the provided Docker script.** This
 was tested with 20 vCPUs, 64 GB of RAM, and a 3090 GPU.
 
+1.  Launch the nvidia maintained container by running:
+
+    ```bash
+    docker run --gpus all -it --rm nvcr.io/nvidia/tensorflow:xx.xx-tf1-py3
+    ```
+   
+   Where xx.xx is the container version. For example, 21.12.
+
+1.  Install the `bert4keras` dependencies in running container, then commit it as images for later use.
+
+    ```bash
+    pip install bert4keras
+    docker commit <CONTAINER ID> adaptive-coder:1.0
+    ```
+
 1.  Clone this repository and `cd` into it.
 
     ```bash
