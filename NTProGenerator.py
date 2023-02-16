@@ -3,6 +3,8 @@
 from __future__ import print_function
 
 import os
+import sys
+
 os.environ['TF_KERAS'] = '1'
 
 import glob, re
@@ -23,16 +25,15 @@ steps_per_epoch = 1000
 epochs = 10000
 
 # bert配置
-config_path = '../BERTMODELS/chinese_L-12_H-768_A-12/bert_config.json'
-checkpoint_path = '../BERTMODELS/chinese_L-12_H-768_A-12/bert_model.ckpt'
+config_path = '/mnt/adaptive_coder_path/chinese_L-12_H-768_A-12/bert_config.json'
+checkpoint_path = '/mnt/adaptive_coder_path/chinese_L-12_H-768_A-12/bert_model.ckpt'
 
 #序列分次预处理
 def pre_tokenize(seq):
     tokens = [n for n in seq]
     return tokens
 
-dict_path = 'vocab.txt'
-
+dict_path = os.path.join(sys.path[0],'vocab.txt')
 
 # 加载并精简词表，建立分词器
 token_dict, keep_tokens = load_vocab(
@@ -42,9 +43,6 @@ token_dict, keep_tokens = load_vocab(
 )
 
 tokenizer = Tokenizer(token_dict,pre_tokenize=pre_tokenize,do_lower_case=False)
-
-with open('seq_good_256.txt') as f:
-    seqs = [seq.strip() for seq in f.readlines()]
 
 class CrossEntropy(Loss):
     """交叉熵作为loss，并mask掉padding部分
@@ -73,7 +71,7 @@ output = CrossEntropy(1)([model.inputs[0], model.outputs[0]])
 model = Model(model.inputs, output)
 model.compile(optimizer=Adam(1e-5))
 model.summary()
-model.load_weights("best_model.weights")
+model.load_weights("/mnt/adaptive_coder_path/models/best_model.weights")
 
 class SeqCompletion(AutoRegressiveDecoder):
     """基于随机采样的故事续写
@@ -190,4 +188,3 @@ class Evaluator(keras.callbacks.Callback):
 
 if __name__ == '__main__':
     just_show()
-    input()

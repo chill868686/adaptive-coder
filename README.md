@@ -35,7 +35,7 @@ was tested with 20 vCPUs, 64 GB of RAM, and a 3090 GPU.
    
    Where xx.xx is the container version. For example, 21.12.
 
-1.  Install the `bert4keras` dependencies in running container, then commit it as images for later use.
+1.  Install the `bert4keras` dependencies in running container, then commit it as a new image for later use.
 
     ```bash
     pip install bert4keras
@@ -48,8 +48,8 @@ was tested with 20 vCPUs, 64 GB of RAM, and a 3090 GPU.
     git clone https://github.com/chill868686/adaptive-coder.git
     ```
     
-1.  Install the `run_docker.py` dependencies. Note: You can use `Conda` or `Virtualenv` to
-    create a new environment to prevent conflicts with your system's Python environment.
+1.  Install the `run_docker.py` dependencies. Note: You can 
+    create a new environment by `Conda` or `Virtualenv` to prevent conflicts with your system's Python environment.
 
     ```bash
     pip3 install -r docker/requirements.txt
@@ -62,7 +62,7 @@ was tested with 20 vCPUs, 64 GB of RAM, and a 3090 GPU.
     ```bash
     python3 docker/run_docker.py \
       --data_path=&&&&&T1050.fasta \
-      --output_path=&&&&&T1050.fasta \
+      --output_dir=&&&&&T1050.fasta \
       --model_preset=&&&&&$DOWNLOAD_DIR
     ```
    

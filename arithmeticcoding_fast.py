@@ -53,7 +53,7 @@ class ArithmeticCoderBase(object):
 		self.high = self.MASK
 	
 	
-	# Updates the code range (low and high) of this arithmetic coder as a result
+	# Updates the code range (low and high) of this arithmetic coder as a results
 	# of processing the given symbol with the given frequency table.
 	# Invariants that are true before and after encoding/decoding each symbol:
 	# - 0 <= low <= code <= high < 2^STATE_SIZE. ('code' exists only in the decoder.)
@@ -445,10 +445,10 @@ class ArithmeticDecoder(ArithmeticCoderBase):
 #	# Returns a string representation of this frequency table,
 #	# useful for debugging only, and the format is subject to change.
 #	def __str__(self):
-#		result = ""
+#		results = ""
 #		for (i, freq) in enumerate(self.frequencies):
-#			result += "{}\t{}\n".format(i, freq)
-#		return result
+#			results += "{}\t{}\n".format(i, freq)
+#		return results
 #
 
 # A wrapper that checks the preconditions (arguments) and postconditions (return value) of all
@@ -461,26 +461,26 @@ class ArithmeticDecoder(ArithmeticCoderBase):
 #	
 #	
 #	def get_symbol_limit(self):
-#		result = self.freqtable.get_symbol_limit()
-#		if result <= 0:
+#		results = self.freqtable.get_symbol_limit()
+#		if results <= 0:
 #			raise AssertionError("Non-positive symbol limit")
-#		return result
+#		return results
 #	
 #	
 #	def get(self, symbol):
-#		result = self.freqtable.get(symbol)
+#		results = self.freqtable.get(symbol)
 #		if not self._is_symbol_in_range(symbol):
 #			raise AssertionError("ValueError expected")
-#		if result < 0:
+#		if results < 0:
 #			raise AssertionError("Negative symbol frequency")
-#		return result
+#		return results
 #	
 #	
 #	def get_total(self):
-#		result = self.freqtable.get_total()
-#		if result < 0:
+#		results = self.freqtable.get_total()
+#		if results < 0:
 #			raise AssertionError("Negative total frequency")
-#		return result
+#		return results
 #	
 #	
 #	def get_low(self, symbol):
