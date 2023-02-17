@@ -72,11 +72,11 @@ def main(argv):
 
     #['en_decoding', 'encoding', 'decoding']
     if FLAGS.coding_type == 'en_decoding':
-        entrypoint = 'data2data.sh'
+        entrypoint = 'conversion.sh'
     elif FLAGS.coding_type == 'encoding':
-        entrypoint = 'data2seqs.sh'
+        entrypoint = 'conversion.sh'
     elif FLAGS.coding_type == 'decoding':
-        entrypoint = 'seqs2data.sh'
+        entrypoint = 'conversion.sh'
     elif FLAGS.coding_type == 'training':
         #model name is are consistent with training file.
         entrypoint = 'training.sh'
@@ -107,7 +107,7 @@ def main(argv):
     signal.signal(signal.SIGINT, lambda unused_sig, unused_frame: container.kill())
 
     for line in container.logs(stream=True):
-        logging.info(line.strip().decode('utf-8'))
+        print(line.strip().decode('utf-8'))
 
 if __name__ == '__main__':
   flags.mark_flags_as_required([
