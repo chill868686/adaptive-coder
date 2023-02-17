@@ -1,10 +1,7 @@
 #! -*- coding: utf-8 -*-
-#测试多媒体文件的编解码
-#补充，对于空序列的序列化处理
-#循环内将缩小为
 import os
 import arithmeticcoding_fast
-import NTProGenerator
+import NTProGenerator   #载入神经网络
 import numpy as np
 from absl import app
 from absl import flags
@@ -32,6 +29,7 @@ def main(_argv):
     logger.addHandler(fh)
     alphabet_size = 4
     index = 32
+    generator = NTProGenerator.getGen()
     if FLAGS.coding_type == 'en_decoding':
         fin = open(FLAGS.file_path, 'rb')   #media file
         fout = open(os.path.join(FLAGS.adaptive_coder_path, 'results/decodes', FLAGS.file_path.split('/')[-1]), 'wb')
@@ -43,7 +41,7 @@ def main(_argv):
         curSeq = ""
         i = 0
         while True:
-            prob = NTProGenerator.seq_completion.next(curSeq)[0]
+            prob = generator.next(curSeq)[0]
             cumul = np.zeros(alphabet_size + 1, dtype=np.uint64)
             cumul[1:] = np.cumsum(prob * 10000000 + 1)
             c = dec.read(cumul, alphabet_size)
@@ -76,7 +74,7 @@ def main(_argv):
         curSeq = ""
         i = 0
         while True:
-            prob = NTProGenerator.seq_completion.next(curSeq)[0]
+            prob = generator.next(curSeq)[0]
             cumul = np.zeros(alphabet_size + 1, dtype=np.uint64)
             cumul[1:] = np.cumsum(prob * 10000000 + 1)
             c = dec.read(cumul, alphabet_size)
@@ -110,7 +108,7 @@ def main(_argv):
         i = 0
         end = False
         while True:
-            prob = NTProGenerator.seq_completion.next(curSeq)[0]
+            prob = generator.next(curSeq)[0]
             cumul = np.zeros(alphabet_size + 1, dtype=np.uint64)
             cumul[1:] = np.cumsum(prob * 10000000 + 1)
             #c = dec.read(cumul, alphabet_size)
@@ -132,14 +130,11 @@ def main(_argv):
             if end:
                 break
 
-
-
         #fseq.write(curSeq + '\n')
         #fseq.close()
         enc.finish()
         bitout.close()
         #bitin.close()
-
 
 if __name__ == '__main__':
     try:
