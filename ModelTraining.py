@@ -3,6 +3,7 @@
 from __future__ import print_function
 
 import os
+import sys
 os.environ['TF_KERAS'] = '1'
 
 import glob, re
@@ -31,28 +32,11 @@ flags.DEFINE_enum(
 
 FLAGS = flags.FLAGS
 
-#序列分次预处理
 def pre_tokenize(seq):
     tokens = [n for n in seq]
     return tokens
 
-def main(_argv):
-
-    maxlen = 300
-    batch_size = 10
-    steps_per_epoch = 1000
-    epochs = 10000
-
-    # bert配置
-    config_path = '/mnt/adaptive_coder_path/basemodel/bert_config.json'
-    checkpoint_path = '/mnt/adaptive_coder_path/basemodel/bert_model.ckpt'
-    dict_path = os.path.join(sys.path[0],'vocab.txt')
-
-
-
-
-dict_path = 'vocab.txt'
-
+dict_path = os.path.join(sys.path[0],'vocab.txt')
 
 # 加载并精简词表，建立分词器
 token_dict, keep_tokens = load_vocab(
@@ -62,9 +46,41 @@ token_dict, keep_tokens = load_vocab(
 )
 
 tokenizer = Tokenizer(token_dict,pre_tokenize=pre_tokenize,do_lower_case=False)
+maxlen = 300
+batch_size = 10
+steps_per_epoch = 1000
+epochs = 10000
 
-with open('seq_good_256_0228.txt') as f:
-    seqs = [seq.strip() for seq in f.readlines()]
+config_path = '/mnt/adaptive_coder_path/basemodel/bert_config.json'
+checkpoint_path = '/mnt/adaptive_coder_path/basemodel/bert_model.ckpt'
+
+model = build_transformer_model(
+    config_path,
+    checkpoint_path,
+    application='lm',
+    keep_tokens=keep_tokens,  # 只保留keep_tokens中的字，精简原字表
+)
+
+class CrossEntropy(Loss):
+    """交叉熵作为loss，并mask掉padding部分
+    """
+    def compute_loss(self, inputs, mask=None):
+        y_true, y_pred = inputs
+        if mask[1] is None:
+            y_mask = 1.0
+        else:
+            y_mask = K.cast(mask[1], K.floatx())[:, 1:]
+        y_true = y_true[:, 1:]  # 目标token_ids
+        y_pred = y_pred[:, :-1]  # 预测序列，错开一位
+        loss = K.sparse_categorical_crossentropy(y_true, y_pred)
+        loss = K.sum(loss * y_mask) / K.sum(y_mask)
+        return loss
+
+output = CrossEntropy(1)([model.inputs[0], model.outputs[0]])
+
+model = Model(model.inputs, output)
+model.compile(optimizer=Adam(1e-5))
+model.summary()
 
 class data_generator(DataGenerator):
     """数据生成器
@@ -83,36 +99,21 @@ class data_generator(DataGenerator):
                 yield [batch_token_ids, batch_segment_ids], None
                 batch_token_ids, batch_segment_ids = [], []
 
-class CrossEntropy(Loss):
-    """交叉熵作为loss，并mask掉padding部分
+class Evaluator(keras.callbacks.Callback):
+    """评估与保存
     """
-    def compute_loss(self, inputs, mask=None):
-        y_true, y_pred = inputs
-        if mask[1] is None:
-            y_mask = 1.0
-        else:
-            y_mask = K.cast(mask[1], K.floatx())[:, 1:]
-        y_true = y_true[:, 1:]  # 目标token_ids
-        y_pred = y_pred[:, :-1]  # 预测序列，错开一位
-        loss = K.sparse_categorical_crossentropy(y_true, y_pred)
-        loss = K.sum(loss * y_mask) / K.sum(y_mask)
-        return loss
+    def __init__(self):
+        self.lowest = 1e10
+        self.save_path = os.path.join(FLAGS.adaptive_coder_path, 'models', FLAGS.file_path.split('.')[-2].split('/')[-1]+'.weights')
+    def on_epoch_end(self, epoch, logs=None):
+        # 保存最优
+        if logs['loss'] <= self.lowest:
+            self.lowest = logs['loss']
+            model.save_weights(self.save_path)
+        # 演示效果
+        just_show()
 
-model = build_transformer_model(
-    config_path,
-    checkpoint_path,
-    application='lm',
-    keep_tokens=keep_tokens,  # 只保留keep_tokens中的字，精简原字表
-)
-
-output = CrossEntropy(1)([model.inputs[0], model.outputs[0]])
-
-model = Model(model.inputs, output)
-model.compile(optimizer=Adam(1e-5))
-model.summary()
-
-
-class StoryCompletion(AutoRegressiveDecoder):
+class SeqCompletion(AutoRegressiveDecoder):
     """基于随机采样的故事续写
     """
     @AutoRegressiveDecoder.wraps(default_rtype='probas')
@@ -128,37 +129,22 @@ class StoryCompletion(AutoRegressiveDecoder):
         return [text + tokenizer.decode(ids) for ids in results]
 
 
-story_completion = StoryCompletion(
+seq_completion = SeqCompletion(
     start_id=None, end_id=tokenizer._token_end_id, maxlen=maxlen
 )
-
 
 def just_show():
     s1 = 'ATCCGG'
     s2 = 'ACTCC'
     s3 = 'GCCAAT'
     for s in [s1, s2, s3]:
-        t = story_completion.generate(s)
+        t = SeqCompletion.generate(s)
         print(u'输入: %s' % s)
         print(u'结果: %s\n' % (''.join(t)))
 
-
-class Evaluator(keras.callbacks.Callback):
-    """评估与保存
-    """
-    def __init__(self):
-        self.lowest = 1e10
-
-    def on_epoch_end(self, epoch, logs=None):
-        # 保存最优
-        if logs['loss'] <= self.lowest:
-            self.lowest = logs['loss']
-            model.save_weights('./best_model_all_256.weights')
-        # 演示效果
-        just_show()
-
-
-if __name__ == '__main__':
+def main(_argv):
+    with open(FLAGS.file_path) as f:
+        seqs = [seq.strip() for seq in f.readlines()]
 
     evaluator = Evaluator()
     train_generator = data_generator(seqs, batch_size)
@@ -169,11 +155,6 @@ if __name__ == '__main__':
         epochs=epochs,
         callbacks=[evaluator]
     )
-
-else:
-    pass
-    #model.load_weights('./best_model.weights')
-
 
 if __name__ == '__main__':
     try:

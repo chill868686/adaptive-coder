@@ -78,7 +78,6 @@ def main(argv):
     elif FLAGS.coding_type == 'decoding':
         entrypoint = 'conversion.sh'
     elif FLAGS.coding_type == 'training':
-        #model name is are consistent with training file.
         entrypoint = 'training.sh'
 
     entrypoint = os.path.join('/mnt/adaptive_coder_path',entrypoint)

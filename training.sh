@@ -23,4 +23,4 @@ while [ -n "$1" ]
         esac
     done
 
-python $acp/DNACoder.py --adaptive_coder_path=$acp --file_path=$fp --coding_type=$ct
+python $acp/ModelTraining.py --adaptive_coder_path=$acp --file_path=$fp --coding_type=$ct
