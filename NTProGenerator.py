@@ -102,7 +102,7 @@ class SeqCompletion(AutoRegressiveDecoder):
 
         return probas
 
-def getGen(model_path="/mnt/adaptive_coder_path/models/best_model.weights"):
+def getGen(model_path):
 
     # bert配置 来源chinese_L-12_H-768_A-12
     config_path = '/mnt/adaptive_coder_path/basemodel/bert_config.json'

@@ -11,7 +11,7 @@ from docker import types
 
 flags.DEFINE_string('log', 'running.log', 'Name of the log file.')
 flags.DEFINE_string('file_path', None, 'Path to data|training file.')
-#flags.DEFINE_string('model', None, 'Name of the en_decoding model.')     调整training.sh
+flags.DEFINE_string('model', 'best_model.weights', 'Name of the en_decoding model.')
 flags.DEFINE_string('docker_image_name', 'b4k:1.0', 'Name of the Docker image.')
 flags.DEFINE_enum(
     'coding_type', 'en_decoding',
@@ -83,7 +83,8 @@ def main(argv):
     entrypoint = os.path.join('/mnt/adaptive_coder_path',entrypoint)
     command_args.extend([
         f'--coding_type={FLAGS.coding_type}',
-        f'--log={FLAGS.log}'
+        f'--log={FLAGS.log}',
+        f'--model={FLAGS.model}'
     ])
 
     client = docker.from_env()

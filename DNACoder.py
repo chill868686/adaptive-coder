@@ -11,6 +11,7 @@ from tqdm import tqdm
 flags.DEFINE_string('log', None, 'Name of the log file.')
 flags.DEFINE_string('file_path', None, 'Paths to data files.')
 flags.DEFINE_string('adaptive_coder_path', None, 'Paths to the project.')
+flags.DEFINE_string('model', None, 'Name of the en_decoding model.')
 flags.DEFINE_enum(
     'coding_type', 'en_decoding',
     ['en_decoding', 'encoding', 'decoding'],
@@ -29,7 +30,7 @@ def main(_argv):
     logger.addHandler(fh)
     alphabet_size = 4
     index = 32
-    generator = NTProGenerator.getGen()
+    generator = NTProGenerator.getGen("/mnt/adaptive_coder_path/models/"+FLAGS.model)
     if FLAGS.coding_type == 'en_decoding':
         fin = open(FLAGS.file_path, 'rb')   #media file
         fout = open(os.path.join(FLAGS.adaptive_coder_path, 'results/decodes', FLAGS.file_path.split('/')[-1]), 'wb')

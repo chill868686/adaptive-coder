@@ -22,9 +22,13 @@ while [ -n "$1" ]
                 ;;
             log)
                 lg="$para"
-                echo lg
+                echo $lg
+                ;;
+            model)
+                ml="$para"
+                echo $ml
                 ;;
         esac
     done
 
-python $acp/DNACoder.py --adaptive_coder_path=$acp --file_path=$fp --coding_type=$ct --log=$lg
+python $acp/DNACoder.py --adaptive_coder_path=$acp --file_path=$fp --coding_type=$ct --log=$lg --model=$ml
