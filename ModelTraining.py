@@ -17,46 +17,39 @@ from bert4keras.snippets import sequence_padding, open
 from bert4keras.snippets import DataGenerator, AutoRegressiveDecoder
 from keras.models import Model
 
-maxlen = 300
-batch_size = 10
-steps_per_epoch = 1000
-epochs = 10000
+from absl import app
+from absl import flags
+import logging
 
-# bert配置
-config_path = '../BERTMODELS/basemodel/bert_config.json'
-checkpoint_path = '../BERTMODELS/basemodel/bert_model.ckpt'
-dict_path = '../BERTMODELS/basemodel/vocab.txt'
+flags.DEFINE_string('log', None, 'Name of the log file.')
+flags.DEFINE_string('file_path', None, 'Paths to seq files.')
+flags.DEFINE_string('adaptive_coder_path', None, 'Paths to the project.')
+flags.DEFINE_enum(
+    'coding_type', 'training',
+    ['training',],
+    '')
 
-# novels = []
-# sents =[]
-#novels.append(sents)
-
-
-# for txt in glob.glob('/root/金庸/*/*.txt'):
-#     txt = open(txt, encoding='gbk').read()
-#     txt = txt.replace('\r', '').replace('\n', '')
-#     txt = txt.replace(u'整理制作，并提供下载', '')
-#     txt = re.sub(u'www.*?com', '', txt)
-#     txt = txt.replace(u'\u3000', ' ')
-#     sents = []
-#     for t in txt.split('  '):
-#         for s in re.findall(u'.*?。', t):
-#             if len(s) <= maxlen - 2:
-#                 sents.append(s)
-
-
-# 加载并精简词表，建立分词器
-# token_dict, keep_tokens = load_vocab(
-#     dict_path=dict_path,
-#     simplified=True,
-#     startswith=['[PAD]', '[UNK]', '[CLS]', '[SEP]'],
-# )
-# tokenizer = Tokenizer(token_dict, do_lower_case=True)
+FLAGS = flags.FLAGS
 
 #序列分次预处理
 def pre_tokenize(seq):
     tokens = [n for n in seq]
     return tokens
+
+def main(_argv):
+
+    maxlen = 300
+    batch_size = 10
+    steps_per_epoch = 1000
+    epochs = 10000
+
+    # bert配置
+    config_path = '/mnt/adaptive_coder_path/basemodel/bert_config.json'
+    checkpoint_path = '/mnt/adaptive_coder_path/basemodel/bert_model.ckpt'
+    dict_path = os.path.join(sys.path[0],'vocab.txt')
+
+
+
 
 dict_path = 'vocab.txt'
 
@@ -180,3 +173,10 @@ if __name__ == '__main__':
 else:
     pass
     #model.load_weights('./best_model.weights')
+
+
+if __name__ == '__main__':
+    try:
+        app.run(main)
+    except SystemExit:
+        pass
