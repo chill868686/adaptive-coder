@@ -35,51 +35,51 @@ was tested with 20 vCPUs, 64 GB of RAM, and a 3090 GPU.
    
    Where xx.xx is the container version. For example, 21.12.
 
-1.  Install the `bert4keras` dependencies in running container, then commit it as a new image for later use.
+1. Install the `bert4keras` dependencies in running container, then commit it as a new image for later use.
 
     ```bash
     pip install bert4keras
     docker commit <CONTAINER ID> adaptive-coder:1.0
     ```
 
-1.  Clone this repository to your machine and `cd` into it.
+2. Clone this repository to your machine and `cd` into it.
 
     ```bash
     git clone https://github.com/chill868686/adaptive-coder.git
     ```
     
-1.  Install the `run_docker.py` dependencies. Note: You can 
+3. Install the `run_docker.py` dependencies. Note: You can 
     create a new environment by `Conda` or `Virtualenv` to prevent conflicts with your system's Python environment.
 
     ```bash
     pip3 install -r docker/requirements.txt
     ```
 
-1.  Run `run_docker.py` pointing to a file containing digital data which you wish to transform to DNA sequences. 
-    You optionally provide the path to the output directory and parameters of the coder. For example, for the
-    `Francis Crick.jpg`:
-
+4. Run `run_docker.py` pointing to a file containing digital data or DNA sequences which you wish to transform. 
+    You optionally provide parameters to command coding:
     ```bash
-    python3 docker/run_docker.py \
-      --data_path=&&&&&T1050.fasta \
-      --output_dir=&&&&&T1050.fasta \
-      --model_preset=&&&&&$DOWNLOAD_DIR
+       python docker/run_docker.py --file_path=(file_path) [OPTIONS]
+       OPTIONS(defaluts):
+         --log=running.log \
+         --model=best_model.weights \
+         --docker_image_name=adaptive-coder:1.0 \
+         --coding_type=en_decoding|encoding|decoding|training
     ```
    
-   We provide the following models:
-
-    * **&&monomer**: This is the original model used at CASP14 with no ensembling.
-
-    * **&&monomer\_casp14**: This is the original model used at CASP14 with
-      `num_ensemble=8`, matching our CASP14 configuration. This is largely
-      provided for reproducibility as it is 8x more computationally
-      expensive for limited accuracy gain (+0.1 average GDT gain on CASP14
-      domains).
-
-    * **&&monomer\_ptm**: This is the original CASP14 model fine tuned with the
-      pTM head, providing a pairwise confidence measure. It is slightly less
-      accurate than the normal monomer model.
-
-    * **&&multimer**: This is the [AlphaFold-Multimer](#citing-this-work) model.
-      To use this model, provide a multi-sequence FASTA file. In addition, the
-      UniProt database should have been downloaded.
+      We provide the following pattern:
+   1. DNA encoding&decoding:
+   ```bash
+    python docker/run_docker.py --file_path=mutimedias/poetry.txt
+    ```
+   2. DNA encoding:
+   ```bash
+    python docker/run_docker.py --file_path=mutimedias/poetry.txt --coding_type=encoding
+    ```
+   3. DNA decoding:
+   ```bash
+    python docker/run_docker.py --file_path=results/encodes/poetry.txt.dna --coding_type=decoding
+    ```
+   4. model training:
+   ```bash
+    python docker/run_docker.py --file_path=datasets/seq_good_256_m.txt --coding_type=training
+    ```
